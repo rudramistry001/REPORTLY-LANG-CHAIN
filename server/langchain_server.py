@@ -13,6 +13,7 @@ import json
 
 # Set up logging for production
 logging.basicConfig(level=logging.WARNING)
+logger = logging.getLogger(__name__)
 
 # Get API key from environment
 api_key = os.getenv("GOOGLE_API_KEY", "")
@@ -34,11 +35,21 @@ app = FastAPI(
 # Update CORS settings for production
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://<your-github-username>.github.io"],  # Restrict to your GitHub Pages domain
+    allow_origins=["*"],  # Allow all origins for now, can be restricted later
     allow_credentials=True,
-    allow_methods=["GET", "POST"],  # Restrict to necessary methods
+    allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
+
+# Add root endpoint for Vercel
+@app.get("/")
+async def root():
+    """Root endpoint for health check"""
+    return {
+        "status": "ok",
+        "message": "REPORTLY API is running",
+        "api_key_configured": bool(api_key)
+    }
 
 # Content length enum
 class ContentLength(str, Enum):
